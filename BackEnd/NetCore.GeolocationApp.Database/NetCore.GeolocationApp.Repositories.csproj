@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <AssemblyName>NetCore.GeolocationApp.Repositories</AssemblyName>
+    <RootNamespace>NetCore.GeolocationApp.Repositories</RootNamespace>
+  </PropertyGroup>
+
+</Project>

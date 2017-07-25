@@ -1,0 +1,8 @@
+BackEnd/NetCore.GeolocationApp/bin/
+BackEnd/NetCore.GeolocationApp/obj/
+BackEnd/NetCore.GeolocationApp.Database/obj/
+BackEnd/NetCore.GeolocationApp.Database/bin/
+BackEnd/NetCore.GeolocationApp.Test/obj/
+BackEnd/NetCore.GeolocationApp.Test/bin/
+BackEnd/NetCore.GeolocationApp.GoogleMapsApi/obj/
+BackEnd/NetCore.GeolocationApp.GoogleMapsApi/bin/
