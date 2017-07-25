@@ -133,11 +133,28 @@ namespace NetCore.GeolocationApp.Services
 
         protected virtual GeolocationResponse GetCurrentPositionFromDB(string userIdentifier)
         {
-            var resultDb = _repository.GetCurrentUserPosition(userIdentifier);
             GeolocationResponse response = new GeolocationResponse();
-            response.Latitude = resultDb.Latitude;
-            response.Longitude = resultDb.Longitude;
-            response.GeolocationEnabled = resultDb.EnableGeoposition;
+            try
+            {
+                var resultDb = _repository.GetCurrentUserPosition(userIdentifier);
+                if(String.IsNullOrEmpty(resultDb.UserIdentifier))
+                {
+                    response.Status = "Error";
+                    response.Message = string.Format("User position user '{0}' not available", userIdentifier);
+                    response.Code = "UserPositionNotFound";
+                    return response;
+                }
+                response.Latitude = resultDb.Latitude;
+                response.Longitude = resultDb.Longitude;
+                response.GeolocationEnabled = resultDb.EnableGeoposition;
+            }
+            catch (Exception ex)
+            {
+                response.Status = "Error";
+                response.Code = "UserPositionError";
+                response.Message = ex.Message;
+            }
+
             return response;
         }
 

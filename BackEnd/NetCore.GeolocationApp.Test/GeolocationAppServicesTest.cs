@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetCore.GeolocationApp.Services;
 using NetCore.GeolocationApp.Test.Dummies;
+using System;
 
 namespace NetCore.GeolocationApp.Test
 {
@@ -42,11 +43,28 @@ namespace NetCore.GeolocationApp.Test
             });
             var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsNotNull(result.AddressOrigin);
+            Console.WriteLine("Dirección origen: " + result.AddressOrigin);
             Assert.IsNotNull(result.AddressDestination);
+            Console.WriteLine("Dirección destino: " + result.AddressDestination);
             Assert.IsNotNull(result.Distance);
-            Assert.IsNotNull(result.Duration);
-            Assert.IsTrue(result.DurationValue > 0);
+            Console.WriteLine("Distancia texto: " + result.Distance);
             Assert.IsTrue(result.DistanceValue > 0);
+            Console.WriteLine("Distancia valor: " + result.DistanceValue);
+            Assert.IsNotNull(result.Duration);
+            Console.WriteLine("Duración texto: " + result.Duration);
+            Assert.IsTrue(result.DurationValue > 0);
+            Console.WriteLine("Duración valor: " + result.DurationValue);
+        }
+
+        [TestMethod]
+        public void GetDistance_NotFoundUser()
+        {
+            var service = InitializeServices();
+            var result = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+            {
+                UserIdentifier = "error_user"
+            });
+            Assert.IsTrue(result.Code == "UserPositionNotFound");
         }
     }
 }
