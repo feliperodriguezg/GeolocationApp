@@ -43,28 +43,42 @@ namespace NetCore.GeolocationApp.Test
             });
             var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsNotNull(result.AddressOrigin);
-            Console.WriteLine("Direcci髇 origen: " + result.AddressOrigin);
+            Console.WriteLine("Direcci贸n origen: " + result.AddressOrigin);
             Assert.IsNotNull(result.AddressDestination);
-            Console.WriteLine("Direcci髇 destino: " + result.AddressDestination);
+            Console.WriteLine("Direcci贸n destino: " + result.AddressDestination);
             Assert.IsNotNull(result.Distance);
-            Console.WriteLine("Distancia texto: " + result.Distance);
+            Console.WriteLine("Distancia: " + result.Distance);
             Assert.IsTrue(result.DistanceValue > 0);
             Console.WriteLine("Distancia valor: " + result.DistanceValue);
             Assert.IsNotNull(result.Duration);
-            Console.WriteLine("Duraci髇 texto: " + result.Duration);
+            Console.WriteLine("Duraci贸n: " + result.Duration);
             Assert.IsTrue(result.DurationValue > 0);
-            Console.WriteLine("Duraci髇 valor: " + result.DurationValue);
+            Console.WriteLine("Duraci贸n valor: " + result.DurationValue);
+            
         }
 
         [TestMethod]
-        public void GetDistance_NotFoundUser()
+        public void UserPositionNotEnable()
         {
+            string identifierOrigin = RepositoryTest.UserIdentifierTest1;
+            string identifierDestination = RepositoryTest.UserIdentifierTest2;
             var service = InitializeServices();
-            var result = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+            var positionUser = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
             {
-                UserIdentifier = "error_user"
+                UserIdentifier = identifierOrigin
             });
-            Assert.IsTrue(result.Code == "UserPositionNotFound");
+            var positionUser2 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+            {
+                UserIdentifier = identifierDestination
+            });
+            service.EnableGeolocation(new WebApiModels.EnableGeolocationRequest
+            {
+                Enable = false,
+                UserIdentifier = identifierDestination
+            });
+            var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
+            Assert.IsTrue(result.Status == Enums.ResponseStatusTypes.UserPositionNotEnable);
+            Console.WriteLine("result.Status: " + result.Status);
         }
     }
 }
