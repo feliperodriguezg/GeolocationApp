@@ -10,6 +10,13 @@ namespace NetCore.GeolocationApp.Test
     {
         public const string ApiKeyGoogleMaps = "AIzaSyAwEYAAUxnE9XmNOsIoFJhd-590PdBDZ_4";
 
+        private void MessageOk(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
         private GeolocationService InitializeServices()
         {
             var service = new GeolocationService(ApiKeyGoogleMaps);
@@ -43,17 +50,17 @@ namespace NetCore.GeolocationApp.Test
             });
             var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsNotNull(result.AddressOrigin);
-            Console.WriteLine("Dirección origen: " + result.AddressOrigin);
+            MessageOk("Dirección origen: " + result.AddressOrigin);
             Assert.IsNotNull(result.AddressDestination);
-            Console.WriteLine("Dirección destino: " + result.AddressDestination);
+            MessageOk("Dirección destino: " + result.AddressDestination);
             Assert.IsNotNull(result.Distance);
-            Console.WriteLine("Distancia: " + result.Distance);
+            MessageOk("Distancia: " + result.Distance);
             Assert.IsTrue(result.DistanceValue > 0);
-            Console.WriteLine("Distancia valor: " + result.DistanceValue);
+            MessageOk("Distancia valor: " + result.DistanceValue);
             Assert.IsNotNull(result.Duration);
-            Console.WriteLine("Duración: " + result.Duration);
+            MessageOk("Duración: " + result.Duration);
             Assert.IsTrue(result.DurationValue > 0);
-            Console.WriteLine("Duración valor: " + result.DurationValue);
+            MessageOk("Duración valor: " + result.DurationValue);
             
         }
 
