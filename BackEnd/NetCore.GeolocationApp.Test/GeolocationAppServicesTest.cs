@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetCore.GeolocationApp.Repositories;
 using NetCore.GeolocationApp.Services;
 using NetCore.GeolocationApp.Test.Dummies;
 using System;
@@ -20,7 +21,7 @@ namespace NetCore.GeolocationApp.Test
         private GeolocationService InitializeServices()
         {
             var service = new GeolocationService(ApiKeyGoogleMaps);
-            service.Repository = new RepositoryTest();
+            service.Repository = new GeolocationMemoryRepository();
             var result1 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
             {
                 UserIdentifier = RepositoryTest.UserIdentifierTest1
@@ -44,10 +45,40 @@ namespace NetCore.GeolocationApp.Test
             {
                 UserIdentifier = identifierOrigin
             });
+            if (String.IsNullOrEmpty(positionUser.Latitude) || String.IsNullOrEmpty(positionUser.Longitude))
+            {
+                positionUser.Latitude = RepositoryTest.LatitudeTest1;
+                positionUser.Longitude = RepositoryTest.LongitudeTest1;
+                service.SetCurrentPosition(new WebApiModels.CurrentPositionInfoRequest
+                {
+                    UserIdentifier = identifierOrigin,
+                    Latitude = positionUser.Latitude,
+                    Longitude = positionUser.Longitude
+                });
+                positionUser = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+                {
+                    UserIdentifier = identifierOrigin
+                });
+            }
             var positionUser2 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
             {
                 UserIdentifier = identifierDestination
             });
+            if (String.IsNullOrEmpty(positionUser2.Latitude) || String.IsNullOrEmpty(positionUser2.Longitude))
+            {
+                positionUser2.Latitude = RepositoryTest.LatitudeTest2;
+                positionUser2.Longitude = RepositoryTest.LongitudeTest2;
+                service.SetCurrentPosition(new WebApiModels.CurrentPositionInfoRequest
+                {
+                    UserIdentifier = identifierDestination,
+                    Latitude = positionUser2.Latitude,
+                    Longitude = positionUser2.Longitude
+                });
+                positionUser2 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+                {
+                    UserIdentifier = identifierDestination
+                });
+            }
             var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsNotNull(result.AddressOrigin);
             MessageOk("Dirección origen: " + result.AddressOrigin);
@@ -74,10 +105,43 @@ namespace NetCore.GeolocationApp.Test
             {
                 UserIdentifier = identifierOrigin
             });
+            if (String.IsNullOrEmpty(positionUser.Latitude) || String.IsNullOrEmpty(positionUser.Longitude))
+            {
+                positionUser.Latitude = RepositoryTest.LatitudeTest1;
+                positionUser.Longitude = RepositoryTest.LongitudeTest1;
+                service.SetCurrentPosition(new WebApiModels.CurrentPositionInfoRequest
+                {
+                    UserIdentifier = identifierOrigin,
+                    Latitude = positionUser.Latitude,
+                    Longitude = positionUser.Longitude
+                });
+                positionUser = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+                {
+                    UserIdentifier = identifierOrigin
+                });
+            }
+                
+
             var positionUser2 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
             {
                 UserIdentifier = identifierDestination
             });
+            if (String.IsNullOrEmpty(positionUser2.Latitude) || String.IsNullOrEmpty(positionUser2.Longitude))
+            {
+                positionUser2.Latitude = RepositoryTest.LatitudeTest2;
+                positionUser2.Longitude = RepositoryTest.LongitudeTest2;
+                service.SetCurrentPosition(new WebApiModels.CurrentPositionInfoRequest
+                {
+                    UserIdentifier = identifierDestination,
+                    Latitude = positionUser2.Latitude,
+                    Longitude = positionUser2.Longitude
+                });
+                positionUser2 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
+                {
+                    UserIdentifier = identifierDestination
+                });
+            }
+
             service.EnableGeolocation(new WebApiModels.EnableGeolocationRequest
             {
                 Enable = false,
@@ -86,6 +150,14 @@ namespace NetCore.GeolocationApp.Test
             var result = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsTrue(result.Status == Enums.ResponseStatusTypes.UserPositionNotEnable);
             Console.WriteLine("result.Status: " + result.Status);
+
+            service.EnableGeolocation(new WebApiModels.EnableGeolocationRequest
+            {
+                Enable = true,
+                UserIdentifier = identifierDestination
+            });
+            var result2 = service.GetCurrentDistance(identifierOrigin, identifierDestination);
+            Assert.IsTrue(result2.Status == Enums.ResponseStatusTypes.Ok);
         }
     }
 }

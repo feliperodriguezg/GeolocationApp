@@ -12,12 +12,17 @@ namespace NetCore.GeolocationApp.Services
         private GoogleMapsApiService _googleMapsApi;
         private IGeolocationRepository _repository;
 
+        private IGeolocationRepository InstanceDefaultRepository()
+        {
+            return new GeolocationMemoryRepository();
+        }
+
         public IGeolocationRepository Repository
         {
             get
             {
                 if (_repository == null)
-                    _repository = new GeolocationRepository();
+                    _repository = InstanceDefaultRepository();
                 return _repository;
             }
             set
@@ -29,7 +34,7 @@ namespace NetCore.GeolocationApp.Services
         public GeolocationService(string apiKey)
         {
             _googleMapsApi = new GoogleMapsApiService(apiKey);
-            _repository = new GeolocationRepository();
+            _repository = InstanceDefaultRepository();
         }
 
         public virtual ServiceResponse SetCurrentPosition(CurrentPositionInfoRequest request)
@@ -70,30 +75,46 @@ namespace NetCore.GeolocationApp.Services
                 UserIdentifier = userIdentifierDestination
             });
             //Validar datos
-            if(!positionDestination.GeolocationEnabled)
+            if (!positionOrigin.GeolocationEnabled)
             {
                 result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
+                result.Message = "Origin position disable";
+                return result;
+            }
+            if (!positionDestination.GeolocationEnabled)
+            {
+                result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
+                result.Message = "Destination position disable";
                 return result;
             }
             result = DistanceTo(positionOrigin, positionDestination);
             return result;
         }
 
+        private bool HasGeoposition(GeolocationResponse geoposition)
+        {
+            return !String.IsNullOrEmpty(geoposition.Latitude) && !String.IsNullOrEmpty(geoposition.Longitude);
+        }
+
         protected virtual DistanceResponse DistanceTo(GeolocationResponse positionOrigin, GeolocationResponse positionDestination)
         {
             DistanceResponse result = new DistanceResponse();
-            string origin = string.Format("{0},{1}", positionOrigin.Latitude, positionOrigin.Longitude);
-            string destination = string.Format("{0},{1}", positionDestination.Latitude, positionDestination.Longitude);
-            var resultGoogleRequest =_googleMapsApi.DistanceMatrix.GetDistance(origin, destination, positionDestination.TravelMode);
-            if(resultGoogleRequest != null)
+            if (!HasGeoposition(positionOrigin) || !HasGeoposition(positionDestination))
+                result.Status = ResponseStatusTypes.UserPositionNotFound;
+            else
             {
-                result.AddressOrigin = resultGoogleRequest.origin_addresses[0];
-                result.AddressDestination = resultGoogleRequest.destination_addresses[0];
-                result.Distance = resultGoogleRequest.rows[0].elements[0].distance.text;
-                result.Duration = resultGoogleRequest.rows[0].elements[0].duration.text;
-
-                result.DistanceValue = resultGoogleRequest.rows[0].elements[0].distance.value;
-                result.DurationValue = resultGoogleRequest.rows[0].elements[0].duration.value;
+                string origin = string.Format("{0},{1}", positionOrigin.Latitude, positionOrigin.Longitude);
+                string destination = string.Format("{0},{1}", positionDestination.Latitude, positionDestination.Longitude);
+                var resultGoogleRequest = _googleMapsApi.DistanceMatrix.GetDistance(origin, destination, positionDestination.TravelMode);
+                if (resultGoogleRequest != null)
+                {
+                    result.AddressOrigin = resultGoogleRequest.origin_addresses[0];
+                    result.AddressDestination = resultGoogleRequest.destination_addresses[0];
+                    result.Distance = resultGoogleRequest.rows[0].elements[0].distance.text;
+                    result.Duration = resultGoogleRequest.rows[0].elements[0].duration.text;
+                    result.DistanceValue = resultGoogleRequest.rows[0].elements[0].distance.value;
+                    result.DurationValue = resultGoogleRequest.rows[0].elements[0].duration.value;
+                }
             }
             return result;
         }
@@ -102,6 +123,15 @@ namespace NetCore.GeolocationApp.Services
         {
             string userIdentifier = request.UserIdentifier;
             GeolocationResponse currentPosition = GetCurrentPositionFromDB(userIdentifier);
+            if (currentPosition == null)
+                currentPosition.Status = ResponseStatusTypes.UserNotFound;
+            else
+            {
+                if ((String.IsNullOrEmpty(currentPosition.Latitude) 
+                    || String.IsNullOrEmpty(currentPosition.Longitude))
+                    && currentPosition.Status != ResponseStatusTypes.UserNotFound)
+                    currentPosition.Status = ResponseStatusTypes.UserPositionNotFound;
+            }
             //Ahorramos una llamada a la API
             currentPosition.Address = string.Empty;
             return currentPosition;
@@ -133,9 +163,17 @@ namespace NetCore.GeolocationApp.Services
         {
             var resultDb = _repository.GetCurrentUserPosition(userIdentifier);
             GeolocationResponse response = new GeolocationResponse();
-            response.Latitude = resultDb.Latitude;
-            response.Longitude = resultDb.Longitude;
-            response.GeolocationEnabled = resultDb.EnableGeoposition;
+            if(resultDb != null)
+            {
+                response.Latitude = resultDb.Latitude;
+                response.Longitude = resultDb.Longitude;
+                response.GeolocationEnabled = resultDb.EnableGeoposition;
+            }
+            else
+            {
+                response.Status = ResponseStatusTypes.UserNotFound;
+            }
+
             return response;
         }
 
