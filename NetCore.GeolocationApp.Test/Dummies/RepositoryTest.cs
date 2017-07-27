@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NetCore.GeolocationApp.Repositories.Models;
 
 namespace NetCore.GeolocationApp.Test.Dummies
 {
@@ -57,6 +58,11 @@ namespace NetCore.GeolocationApp.Test.Dummies
                 .EnableGeolocation = true;
         }
 
+        public bool ExistUser(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
         public CurrentUserPositionResponse GetCurrentUserPosition(string userIdentifier)
         {
             CurrentUserPositionResponse response = new CurrentUserPositionResponse();
@@ -69,6 +75,11 @@ namespace NetCore.GeolocationApp.Test.Dummies
                 response.Longitude = query.CurrentLongitude;
             }
             return response;
+        }
+
+        public List<FriendInfoResponse> GetFriends(string userIdentifier)
+        {
+            throw new NotImplementedException();
         }
 
         public void SetCurrentPosition(string userIdentifier, string latitude, string longitude)
