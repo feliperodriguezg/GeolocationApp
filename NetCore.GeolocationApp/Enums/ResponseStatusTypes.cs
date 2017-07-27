@@ -14,6 +14,8 @@ namespace NetCore.GeolocationApp.Enums
         UserPositionNotEnable = 404,
         [Description("Posición del usuario no encontrada")]
         UserPositionNotFound = 406,
+        [Description("No se ha encontrado amigos relacionados")]
+        FriendsNotFound = 500,
         [Description("Error desconocido")]
         UnknowError = 2000
     }

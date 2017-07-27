@@ -1,35 +1,44 @@
-﻿namespace NetCore.GeolocationApp.Repositories
+﻿using System;
+using System.Collections.Generic;
+using NetCore.GeolocationApp.Repositories.Models;
+
+namespace NetCore.GeolocationApp.Repositories
 {
     public class GeolocationRepository : IGeolocationRepository
     {
-        public GeolocationRepository()
+        public void DisableGeolocation(string userIdentifier)
         {
-
+            throw new NotImplementedException();
         }
 
-        public virtual CurrentUserPositionResponse GetCurrentUserPosition(string userIdentifier)
+        public void EnableGeolocation(string userIdentifier)
         {
-            return new CurrentUserPositionResponse();
+            throw new NotImplementedException();
         }
 
-        public virtual void EnableGeolocation(string userIdentifier)
+        public bool ExistUser(string userIdentifier)
         {
-
+            throw new NotImplementedException();
         }
 
-        public virtual void DisableGeolocation(string userIdentifier)
+        public CurrentUserPositionResponse GetCurrentUserPosition(string userIdentifier)
         {
-
+            throw new NotImplementedException();
         }
 
-        public virtual void SetCurrentPosition(string userIdentifier, string latitude, string longitude)
+        public List<FriendInfoResponse> GetFriends(string userIdentifier)
         {
-
+            throw new NotImplementedException();
         }
 
-        public virtual void UpdateCurrentTravelMode(string userIdentifier, string mode)
+        public void SetCurrentPosition(string userIdentifier, string latitude, string longitude)
         {
+            throw new NotImplementedException();
+        }
 
+        public void UpdateCurrentTravelMode(string userIdentifier, string mode)
+        {
+            throw new NotImplementedException();
         }
     }
 }

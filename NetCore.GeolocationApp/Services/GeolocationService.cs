@@ -37,6 +37,41 @@ namespace NetCore.GeolocationApp.Services
             _repository = InstanceDefaultRepository();
         }
 
+        public FriendInformationResponse GetFriends(FriendsInformationRequest request)
+        {
+            var response = new FriendInformationResponse();
+            try
+            {
+                if(!_repository.ExistUser(request.UserIdentifier))
+                {
+                    response.Status = ResponseStatusTypes.UserNotFound;
+                }
+                else
+                {
+                    var result = _repository.GetFriends(request.UserIdentifier);
+                    if (result != null)
+                    {
+                        foreach (var item in result)
+                        {
+                            response.Friends.Add(new FriendInformation
+                            {
+                                UserIdentifier = item.UserIdentifier,
+                                IsEnable = true,
+                                Name = item.Name,
+                                UrlPhoto = item.UrlPhoto
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public virtual ServiceResponse SetCurrentPosition(CurrentPositionInfoRequest request)
         {
             ServiceResponse response = new ServiceResponse();
@@ -64,7 +99,7 @@ namespace NetCore.GeolocationApp.Services
 
         public virtual DistanceResponse GetCurrentDistance(string userIdentifierOrigin, string userIdentifierDestination)
         {
-            DistanceResponse result = new DistanceResponse();
+            var result = new DistanceResponse();
             //Obtener posiciones
             GeolocationResponse positionOrigin = GetCurrentPositionUser(new GeolocationRequest
             {

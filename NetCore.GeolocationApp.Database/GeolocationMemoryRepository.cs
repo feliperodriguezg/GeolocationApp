@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using NetCore.GeolocationApp.Repositories.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,23 +17,34 @@ namespace NetCore.GeolocationApp.Repositories
             public string CurrentTravelMode { get; set; }
         }
 
+        public class FriendInfo
+        {
+            public string UserIdentifier { get; set; }
+            public string Name { get; set; }
+            public string UrlPhoto { get; set; }
+            public string FriendOf { get; set; }
+        }
+
         public GeolocationMemoryRepository()
         {
             if(_memoryDataBase == null)
                 _memoryDataBase = InitDatabase();
+            if (_friends == null)
+                _friends = InitListFriends();
         }
 
-        private static List<UserInfoTest> _memoryDataBase;
-        private List<UserInfoTest> InitDatabase()
+        private static List<UserInfoResponse> _memoryDataBase;
+        private static List<FriendInfoResponse> _friends;
+        private List<UserInfoResponse> InitDatabase()
         {
-            return new List<UserInfoTest>()
+            return new List<UserInfoResponse>()
             {
-                new UserInfoTest()
+                new UserInfoResponse()
                 {
                     UserIdentifier = "frodriguez",
                     EnableGeolocation = true
                 },
-                new UserInfoTest()
+                new UserInfoResponse()
                 {
                     UserIdentifier = "usertest",
                     EnableGeolocation = true
@@ -40,10 +52,31 @@ namespace NetCore.GeolocationApp.Repositories
             };
         }
 
-
-        private UserInfoTest GetUserInfo(string userIdentifier)
+        public List<FriendInfoResponse> InitListFriends()
         {
-            UserInfoTest response = _memoryDataBase.SingleOrDefault(x => x.UserIdentifier == userIdentifier);
+            return new List<FriendInfoResponse>()
+            {
+                new FriendInfoResponse
+                {
+                    Name = "Felipe Rodríguez",
+                    UrlPhoto = "",
+                    UserIdentifier = "frodriguez",
+                    FriendOf = "usertest"
+                },
+                new FriendInfoResponse
+                {
+                    Name = "User test",
+                    UrlPhoto = "",
+                    UserIdentifier = "usertest",
+                    FriendOf = "frodriguez"
+                }
+            };
+        }
+
+
+        private UserInfoResponse GetUserInfo(string userIdentifier)
+        {
+            UserInfoResponse response = _memoryDataBase.SingleOrDefault(x => x.UserIdentifier == userIdentifier);
             return response;
         }
 
@@ -94,6 +127,24 @@ namespace NetCore.GeolocationApp.Repositories
             {
                 user.CurrentTravelMode = mode;
             }
+        }
+
+        public List<FriendInfoResponse> GetFriends(string userIdentifier)
+        {
+            var result = new List<FriendInfoResponse>();
+            var user = GetUserInfo(userIdentifier);
+            if(user != null)
+            {
+                var query = _friends.Where(x => x.FriendOf == userIdentifier);
+                if (query != null)
+                    result = query.ToList();
+            }
+            return result;
+        }
+
+        public bool ExistUser(string userIdentifier)
+        {
+            return GetUserInfo(userIdentifier) == null ? false : true;
         }
     }
 }
