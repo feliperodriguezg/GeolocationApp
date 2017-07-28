@@ -9,14 +9,12 @@ namespace NetCore.GeolocationApp.Services
 {
     public class GeolocationService
     {
+        #region Members
         private GoogleMapsApiService _googleMapsApi;
         private IGeolocationRepository _repository;
+        #endregion
 
-        private IGeolocationRepository InstanceDefaultRepository()
-        {
-            return new GeolocationMemoryRepository();
-        }
-
+        #region Properties
         public IGeolocationRepository Repository
         {
             get
@@ -30,14 +28,18 @@ namespace NetCore.GeolocationApp.Services
                 _repository = value;
             }
         }
+        #endregion
 
+        #region Constructor
         public GeolocationService(string apiKey)
         {
             _googleMapsApi = new GoogleMapsApiService(apiKey);
             _repository = InstanceDefaultRepository();
         }
+        #endregion
 
-        public FriendInformationResponse GetFriends(FriendsInformationRequest request)
+        #region Public
+        public virtual FriendInformationResponse GetFriends(FriendsInformationRequest request)
         {
             var response = new FriendInformationResponse();
             try
@@ -56,7 +58,7 @@ namespace NetCore.GeolocationApp.Services
                             response.Friends.Add(new FriendInformation
                             {
                                 UserIdentifier = item.UserIdentifier,
-                                IsEnable = true,
+                                IsEnable = _repository.IsFollowerOf(item.UserIdentifier, request.UserIdentifier),
                                 Name = item.Name,
                                 UrlPhoto = item.UrlPhoto
                             });
@@ -69,6 +71,32 @@ namespace NetCore.GeolocationApp.Services
                 response.Status = ResponseStatusTypes.UnknowError;
                 response.Message = ex.Message;
             }
+            return response;
+        }
+
+        public virtual ServiceResponse UpdateFollow(UpdateFollowRequest request)
+        {
+            ServiceResponse response = new ServiceResponse();
+            if (!_repository.ExistUser(request.UserIdentifierFriend) || 
+                !_repository.ExistUser(request.UserIdentifierFollower))
+                response.Status = ResponseStatusTypes.UserNotFound;
+            else
+            {
+                _repository.AllowFollow(
+                    request.UserIdentifierFriend, 
+                    request.UserIdentifierFollower, 
+                    request.Allow);
+                response.Status = ResponseStatusTypes.Ok;
+            }
+            return response;
+        }
+
+        public virtual ServiceResponse AllowFollow(AllowFollowRequest request)
+        {
+            ServiceResponse response = new ServiceResponse();
+            bool isFollower = _repository.IsFollowerOf(request.UserIdentifierFriend, request.UserIdentifier);
+            if (!isFollower)
+                response.Status = ResponseStatusTypes.NotAllowFollow;
             return response;
         }
 
@@ -126,11 +154,43 @@ namespace NetCore.GeolocationApp.Services
             return result;
         }
 
+        public virtual GeolocationResponse GetCurrentPositionUser(GeolocationRequest request)
+        {
+            string userIdentifier = request.UserIdentifier;
+            GeolocationResponse currentPosition = GetCurrentPositionFromDB(userIdentifier);
+            if (currentPosition == null)
+                currentPosition.Status = ResponseStatusTypes.UserNotFound;
+            else
+            {
+                if ((String.IsNullOrEmpty(currentPosition.Latitude)
+                    || String.IsNullOrEmpty(currentPosition.Longitude))
+                    && currentPosition.Status != ResponseStatusTypes.UserNotFound)
+                    currentPosition.Status = ResponseStatusTypes.UserPositionNotFound;
+            }
+            //Ahorramos una llamada a la API
+            currentPosition.Address = string.Empty;
+            return currentPosition;
+        }
+        #endregion
+
+        #region Private
+        private IGeolocationRepository InstanceDefaultRepository()
+        {
+            return new GeolocationMemoryRepository();
+        }
+
         private bool HasGeoposition(GeolocationResponse geoposition)
         {
             return !String.IsNullOrEmpty(geoposition.Latitude) && !String.IsNullOrEmpty(geoposition.Longitude);
         }
 
+        private void ValidateRequest(CurrentPositionInfoRequest request)
+        {
+            //Pendiente
+        }
+        #endregion
+
+        #region Protected
         protected virtual DistanceResponse DistanceTo(GeolocationResponse positionOrigin, GeolocationResponse positionDestination)
         {
             DistanceResponse result = new DistanceResponse();
@@ -154,34 +214,16 @@ namespace NetCore.GeolocationApp.Services
             return result;
         }
 
-        public virtual GeolocationResponse GetCurrentPositionUser(GeolocationRequest request)
-        {
-            string userIdentifier = request.UserIdentifier;
-            GeolocationResponse currentPosition = GetCurrentPositionFromDB(userIdentifier);
-            if (currentPosition == null)
-                currentPosition.Status = ResponseStatusTypes.UserNotFound;
-            else
-            {
-                if ((String.IsNullOrEmpty(currentPosition.Latitude) 
-                    || String.IsNullOrEmpty(currentPosition.Longitude))
-                    && currentPosition.Status != ResponseStatusTypes.UserNotFound)
-                    currentPosition.Status = ResponseStatusTypes.UserPositionNotFound;
-            }
-            //Ahorramos una llamada a la API
-            currentPosition.Address = string.Empty;
-            return currentPosition;
-        }
-
         protected virtual string GetAddress(GeolocationResponse currentPosition)
         {
             string address = string.Empty;
             var result = _googleMapsApi.GeoLocation.Geocoding(currentPosition.Latitude, currentPosition.Longitude);
-            if(result.results != null && result.results.Count > 0)
+            if (result.results != null && result.results.Count > 0)
             {
                 var queryAddress = result.results.SingleOrDefault(x =>
                 {
                     var query = x.types.SingleOrDefault(y => y == "street_address");
-                    if(!String.IsNullOrEmpty(query))
+                    if (!String.IsNullOrEmpty(query))
                     {
                         return true;
                     }
@@ -198,7 +240,7 @@ namespace NetCore.GeolocationApp.Services
         {
             var resultDb = _repository.GetCurrentUserPosition(userIdentifier);
             GeolocationResponse response = new GeolocationResponse();
-            if(resultDb != null)
+            if (resultDb != null)
             {
                 response.Latitude = resultDb.Latitude;
                 response.Longitude = resultDb.Longitude;
@@ -211,10 +253,6 @@ namespace NetCore.GeolocationApp.Services
 
             return response;
         }
-
-        private void ValidateRequest(CurrentPositionInfoRequest request)
-        {
-            //Pendiente
-        }
+        #endregion
     }
 }

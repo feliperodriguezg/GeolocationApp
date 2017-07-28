@@ -25,16 +25,26 @@ namespace NetCore.GeolocationApp.Repositories
             public string FriendOf { get; set; }
         }
 
+        public class FollowInfo
+        {
+            public string UserIdentifier { get; set; }
+            public string UserIdentifierFollower { get; set; }
+        }
+
         public GeolocationMemoryRepository()
         {
             if(_memoryDataBase == null)
                 _memoryDataBase = InitDatabase();
             if (_friends == null)
                 _friends = InitListFriends();
+            if (_follows == null)
+                _follows = new List<FollowInfo>();
         }
 
         private static List<UserInfoResponse> _memoryDataBase;
         private static List<FriendInfoResponse> _friends;
+        private static List<FollowInfo> _follows;
+
         private List<UserInfoResponse> InitDatabase()
         {
             return new List<UserInfoResponse>()
@@ -145,6 +155,33 @@ namespace NetCore.GeolocationApp.Repositories
         public bool ExistUser(string userIdentifier)
         {
             return GetUserInfo(userIdentifier) == null ? false : true;
+        }
+
+        public void AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
+        {
+            var query = _follows.SingleOrDefault(x => x.UserIdentifierFollower == userIdentifierFollower
+            && x.UserIdentifier == userIdentifierOrigin);
+
+            if (enable)
+            {
+                if (query == null)
+                    _follows.Add(new FollowInfo
+                    {
+                        UserIdentifier = userIdentifierOrigin,
+                        UserIdentifierFollower = userIdentifierFollower
+                    });
+            }
+            else
+            {
+                if(query != null)
+                    _follows.Remove(query);
+            }
+        }
+
+        public bool IsFollowerOf(string userIdentifierOrigin, string userIdentifierFollower)
+        {
+            return _follows.Exists(x => x.UserIdentifierFollower == userIdentifierFollower
+            && x.UserIdentifier == userIdentifierOrigin);
         }
     }
 }

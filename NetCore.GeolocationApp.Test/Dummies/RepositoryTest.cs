@@ -46,6 +46,11 @@ namespace NetCore.GeolocationApp.Test.Dummies
             });
         }
 
+        public void AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DisableGeolocation(string userIdentifier)
         {
             _usersRepositoryTest.Single(x => x.UserIdentifier == userIdentifier)
@@ -78,6 +83,11 @@ namespace NetCore.GeolocationApp.Test.Dummies
         }
 
         public List<FriendInfoResponse> GetFriends(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsFollowerOf(string userIdentifierOrigin, string userIdentifierFollower)
         {
             throw new NotImplementedException();
         }

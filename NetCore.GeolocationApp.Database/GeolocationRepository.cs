@@ -6,6 +6,11 @@ namespace NetCore.GeolocationApp.Repositories
 {
     public class GeolocationRepository : IGeolocationRepository
     {
+        public void AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DisableGeolocation(string userIdentifier)
         {
             throw new NotImplementedException();
@@ -27,6 +32,11 @@ namespace NetCore.GeolocationApp.Repositories
         }
 
         public List<FriendInfoResponse> GetFriends(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsFollowerOf(string userIdentifierOrigin, string userIdentifierFollower)
         {
             throw new NotImplementedException();
         }

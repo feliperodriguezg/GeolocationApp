@@ -36,5 +36,34 @@ namespace NetCore.GeolocationApp.Controllers
             }
             return response;
         }
+
+        [HttpPost]
+        [Route("AllowFollow")]
+        public bool Post(string userIdentifier, string userIdentifierFriend, bool allowFollow)
+        {
+            bool enable = true;
+            var result = _services.UpdateFollow(new UpdateFollowRequest
+            {
+                Allow = allowFollow,
+                UserIdentifierFriend = userIdentifierFriend,
+                UserIdentifierFollower = userIdentifier
+            });
+            enable = result.Status == Enums.ResponseStatusTypes.Ok;
+            return enable;
+        }
+
+        [HttpPost]
+        [Route("AllowFollow")]
+        public bool Post(string userIdentifier, string userIdentifierFriend)
+        {
+            bool enable = false;
+            var result = _services.AllowFollow(new AllowFollowRequest
+            {
+                UserIdentifier = userIdentifier,
+                UserIdentifierFriend = userIdentifierFriend
+            });
+            enable = result.Status == Enums.ResponseStatusTypes.Ok;
+            return enable;
+        }
     }
 }

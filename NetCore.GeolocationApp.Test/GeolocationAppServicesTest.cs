@@ -159,5 +159,40 @@ namespace NetCore.GeolocationApp.Test
             var result2 = service.GetCurrentDistance(identifierOrigin, identifierDestination);
             Assert.IsTrue(result2.Status == Enums.ResponseStatusTypes.Ok);
         }
+
+        [TestMethod]
+        public void FollowTest()
+        {
+            string identifierOrigin = RepositoryTest.UserIdentifierTest1;
+            string identifierDestination = RepositoryTest.UserIdentifierTest2;
+            var service = InitializeServices();
+
+            var response = service.UpdateFollow(new WebApiModels.UpdateFollowRequest
+            {
+                Allow = true,
+                UserIdentifierFollower = identifierOrigin,
+                UserIdentifierFriend = identifierDestination
+            });
+            Assert.IsTrue(response.Status == Enums.ResponseStatusTypes.Ok);
+            var responseAllowFollow = service.AllowFollow(new WebApiModels.AllowFollowRequest
+            {
+                UserIdentifierFriend = identifierDestination,
+                UserIdentifier = identifierOrigin
+            });
+            Assert.IsTrue(responseAllowFollow.Status == Enums.ResponseStatusTypes.Ok);
+            var response2 = service.UpdateFollow(new WebApiModels.UpdateFollowRequest
+            {
+                Allow = false,
+                UserIdentifierFollower = identifierOrigin,
+                UserIdentifierFriend = identifierDestination
+            });
+            Assert.IsTrue(response2.Status == Enums.ResponseStatusTypes.Ok);
+            var responseNotAllowFollow = service.AllowFollow(new WebApiModels.AllowFollowRequest
+            {
+                UserIdentifierFriend = identifierDestination,
+                UserIdentifier = identifierOrigin
+            });
+            Assert.IsTrue(responseNotAllowFollow.Status == Enums.ResponseStatusTypes.NotAllowFollow);
+        }
     }
 }
