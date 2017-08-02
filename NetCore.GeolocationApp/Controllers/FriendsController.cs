@@ -5,73 +5,75 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using NetCore.GeolocationApp.WebApiModels;
 using NetCore.GeolocationApp.Services;
+using System.Net;
+using NetCore.GeolocationApp.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace NetCore.GeolocationApp.Controllers
 {
     [Route("api/[controller]")]
-    public class FriendsController : Controller
+    public class FriendsController : ApiControllerBase
     {
-        private const string ApiKey = "AIzaSyAwEYAAUxnE9XmNOsIoFJhd-590PdBDZ_4";
-        private static readonly GeolocationService _services = new GeolocationService(ApiKey);
+
 
         // GET: api/values
         [HttpGet]
         [Route("{userIdentifier}")]
-        public FriendInformationResponse Get(string userIdentifier)
+        public IActionResult Get(string userIdentifier)
         {
-            var response = new FriendInformationResponse();
+            var response = StatusCode(HttpStatusCode.OK, ResponseOk<FriendInformationResponse>());
             try
             {
-                response = _services.GetFriends(new FriendsInformationRequest
+                var result = GeolocationService.GetFriends(new FriendsInformationRequest
                 {
                     UserIdentifier = userIdentifier
                 });
-                var friends = response.Friends;
-                foreach (FriendInformation friend in friends)
+                if (result.Status == Enums.ResponseStatusTypes.Ok)
                 {
-                    if (friend.IsEnable)
+                    var friends = result.Friends;
+                    foreach (FriendInformation friend in friends)
                     {
-                        friend.DistanceInfo = _services.GetCurrentDistance(userIdentifier, friend.UserIdentifier);
+                        if (friend.IsEnable)
+                        {
+                            friend.DistanceInfo = GeolocationService.GetCurrentDistance(userIdentifier, friend.UserIdentifier);
+                        }
                     }
+                    response.Value = ResponseOk<FriendInformationResponse>(result);
                 }
+                else
+                    response = StatusCode(HttpStatusCode.BadRequest, ResponseError<FriendInformationResponse>(result, result.StatusText));
             }
             catch (Exception ex)
             {
-                response.Status = Enums.ResponseStatusTypes.UnknowError;
-                response.Message = ex.Message;
+                response = StatusCode(HttpStatusCode.InternalServerError, ResponseError<bool>(false, ex.Message));
             }
             return response;
         }
 
         [HttpPost]
         [Route("AllowFollow")]
-        public bool Post(string userIdentifier, string userIdentifierFriend, bool allowFollow)
+        public IActionResult Post(string userIdentifier, string userIdentifierFriend, bool follow)
         {
-            bool enable = true;
-            var result = _services.UpdateFollow(new UpdateFollowRequest
+            var response = StatusCode(HttpStatusCode.OK, ResponseOk<ServiceResponse>(new ServiceResponse()));
+            try
             {
-                Allow = allowFollow,
-                UserIdentifierFriend = userIdentifierFriend,
-                UserIdentifierFollower = userIdentifier
-            });
-            enable = result.Status == Enums.ResponseStatusTypes.Ok;
-            return enable;
-        }
-
-        [HttpPost]
-        [Route("AllowFollow")]
-        public bool Post(string userIdentifier, string userIdentifierFriend)
-        {
-            bool enable = false;
-            var result = _services.AllowFollow(new AllowFollowRequest
+                var result = GeolocationService.UpdateFollow(new UpdateFollowRequest
+                {
+                    Allow = follow,
+                    UserIdentifierFriend = userIdentifierFriend,
+                    UserIdentifierFollower = userIdentifier
+                });
+                if (result.Status != Enums.ResponseStatusTypes.Ok)
+                    response = StatusCode(HttpStatusCode.NotModified, ResponseOk<ServiceResponse>(result));
+                else
+                    response.Value = ResponseOk<ServiceResponse>(result);
+            }
+            catch(Exception ex)
             {
-                UserIdentifier = userIdentifier,
-                UserIdentifierFriend = userIdentifierFriend
-            });
-            enable = result.Status == Enums.ResponseStatusTypes.Ok;
-            return enable;
+                response = StatusCode(HttpStatusCode.InternalServerError, ResponseError<bool>(false, ex.Message));
+            }
+            return response;
         }
     }
 }

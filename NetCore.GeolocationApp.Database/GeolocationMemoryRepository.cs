@@ -84,24 +84,35 @@ namespace NetCore.GeolocationApp.Repositories
         }
 
 
-        private UserInfoResponse GetUserInfo(string userIdentifier)
+        public UserInfoResponse GetUserInfo(string userIdentifier)
         {
             UserInfoResponse response = _memoryDataBase.SingleOrDefault(x => x.UserIdentifier == userIdentifier);
             return response;
         }
 
-        public void DisableGeolocation(string userIdentifier)
+        public bool DisableGeolocation(string userIdentifier)
         {
             var user = GetUserInfo(userIdentifier);
             if (user != null)
+            {
                 user.EnableGeolocation = false;
+                return true;
+            }
+            else
+                return false;
         }
 
-        public void EnableGeolocation(string userIdentifier)
+        public bool EnableGeolocation(string userIdentifier)
         {
             var user = GetUserInfo(userIdentifier);
             if (user != null)
+            {
                 user.EnableGeolocation = true;
+                return true;
+            }
+            else
+                return false;
+                
         }
 
         public CurrentUserPositionResponse GetCurrentUserPosition(string userIdentifier)
@@ -120,23 +131,29 @@ namespace NetCore.GeolocationApp.Repositories
             return response;
         }
 
-        public void SetCurrentPosition(string userIdentifier, string latitude, string longitude)
+        public bool SetCurrentPosition(string userIdentifier, string latitude, string longitude)
         {
             var user = GetUserInfo(userIdentifier);
-            if(user != null)
+            if (user != null)
             {
                 user.CurrentLatitude = latitude;
                 user.CurrentLongitude = longitude;
+                return true;
             }
+            else
+                return false;
         }
 
-        public void UpdateCurrentTravelMode(string userIdentifier, string mode)
+        public bool UpdateCurrentTravelMode(string userIdentifier, string mode)
         {
             var user = GetUserInfo(userIdentifier);
-            if(user != null)
+            if (user != null)
             {
                 user.CurrentTravelMode = mode;
+                return true;
             }
+            else
+                return false;
         }
 
         public List<FriendInfoResponse> GetFriends(string userIdentifier)
@@ -157,31 +174,39 @@ namespace NetCore.GeolocationApp.Repositories
             return GetUserInfo(userIdentifier) == null ? false : true;
         }
 
-        public void AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
+        public bool AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
         {
             var query = _follows.SingleOrDefault(x => x.UserIdentifierFollower == userIdentifierFollower
             && x.UserIdentifier == userIdentifierOrigin);
-
-            if (enable)
+            try
             {
-                if (query == null)
-                    _follows.Add(new FollowInfo
-                    {
-                        UserIdentifier = userIdentifierOrigin,
-                        UserIdentifierFollower = userIdentifierFollower
-                    });
+                if (enable)
+                {
+                    if (query == null)
+                        _follows.Add(new FollowInfo
+                        {
+                            UserIdentifier = userIdentifierOrigin,
+                            UserIdentifierFollower = userIdentifierFollower
+                        });
+                    return true;
+                }
+                else
+                {
+                    if (query != null)
+                        _follows.Remove(query);
+                    return true;
+                }
             }
-            else
+            catch
             {
-                if(query != null)
-                    _follows.Remove(query);
+                return false;
             }
         }
 
         public bool IsFollowerOf(string userIdentifierOrigin, string userIdentifierFollower)
         {
-            return _follows.Exists(x => x.UserIdentifierFollower == userIdentifierFollower
-            && x.UserIdentifier == userIdentifierOrigin);
+            var query = _follows.SingleOrDefault(x => x.UserIdentifier == userIdentifierOrigin && x.UserIdentifierFollower == userIdentifierFollower);
+            return query != null;
         }
     }
 }

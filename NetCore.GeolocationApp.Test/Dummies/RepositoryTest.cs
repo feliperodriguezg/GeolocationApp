@@ -15,7 +15,7 @@ namespace NetCore.GeolocationApp.Test.Dummies
         public string UserIdentifier { get; set; }
         public string CurrentTravelMode { get; set; }
     }
-
+    [Obsolete]
     public class RepositoryTest : IGeolocationRepository
     {
         public const string UserIdentifierTest1 = "frodriguez";
@@ -87,22 +87,48 @@ namespace NetCore.GeolocationApp.Test.Dummies
             throw new NotImplementedException();
         }
 
+        public UserInfoResponse GetUserInfo(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsFollowerOf(string userIdentifierOrigin, string userIdentifierFollower)
         {
             throw new NotImplementedException();
         }
 
-        public void SetCurrentPosition(string userIdentifier, string latitude, string longitude)
+        public bool SetCurrentPosition(string userIdentifier, string latitude, string longitude)
         {
             var entity = _usersRepositoryTest.Single(x => x.UserIdentifier == userIdentifier);
             entity.CurrentLatitude = latitude;
             entity.CurrentLongitude = longitude;
+            return true;
         }
 
         public void UpdateCurrentTravelMode(string userIdentifier, string mode)
         {
             var userInfo = _usersRepositoryTest.Single(x => x.UserIdentifier == userIdentifier);
             userInfo.CurrentTravelMode = mode;
+        }
+
+        bool IGeolocationRepository.AllowFollow(string userIdentifierOrigin, string userIdentifierFollower, bool enable)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IGeolocationRepository.DisableGeolocation(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IGeolocationRepository.EnableGeolocation(string userIdentifier)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IGeolocationRepository.UpdateCurrentTravelMode(string userIdentifier, string mode)
+        {
+            throw new NotImplementedException();
         }
     }
 }

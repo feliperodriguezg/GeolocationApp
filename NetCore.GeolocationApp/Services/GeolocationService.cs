@@ -106,8 +106,19 @@ namespace NetCore.GeolocationApp.Services
             ServiceResponse response = new ServiceResponse();
             try
             {
-                ValidateRequest(request);
-                _repository.SetCurrentPosition(request.UserIdentifier, request.Latitude, request.Longitude);
+                if(String.IsNullOrEmpty(request.UserIdentifier))
+                {
+                    response.Status = ResponseStatusTypes.UserNotFound;
+                }
+                else if(String.IsNullOrEmpty(request.Latitude) || String.IsNullOrEmpty(request.Longitude))
+                {
+                    response.Status = ResponseStatusTypes.UserPositionNotFound;
+                }
+                else
+                {
+                    bool result = _repository.SetCurrentPosition(request.UserIdentifier, request.Latitude, request.Longitude);
+                    response.Status = (result) ? ResponseStatusTypes.Ok : ResponseStatusTypes.UpdateFail;
+                }
             }
             catch (Exception ex)
             {
@@ -117,60 +128,119 @@ namespace NetCore.GeolocationApp.Services
             return response;
         }
 
-        public virtual void EnableGeolocation(EnableGeolocationRequest request)
+        public virtual ServiceResponse EnableGeolocation(EnableGeolocationRequest request)
         {
-            bool enable = request.Enable;
-            if (enable)
-                _repository.EnableGeolocation(request.UserIdentifier);
-            else
-                _repository.DisableGeolocation(request.UserIdentifier);
+            ServiceResponse response = new ServiceResponse();
+            try
+            {
+                bool enable = request.Enable;
+                bool result = false;
+                if (enable)
+                {
+                    result = _repository.EnableGeolocation(request.UserIdentifier);
+                    if (!result)
+                        response.Status = ResponseStatusTypes.UpdateFail;
+                }
+                else
+                {
+                    result = _repository.DisableGeolocation(request.UserIdentifier);
+                    if (!result)
+                        response.Status = ResponseStatusTypes.UpdateFail;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public virtual ServiceResponse UserHasEnableGeolocation(string userIdentifier)
+        {
+            ServiceResponse response = new ServiceResponse();
+            try
+            {
+                var data = _repository.GetUserInfo(userIdentifier);
+                if(data != null)
+                {
+                    if (!data.EnableGeolocation)
+                        response.Status = ResponseStatusTypes.UserHasNotEnableGeolocation;
+                }
+                else
+                    response.Status = ResponseStatusTypes.UserNotFound;
+            }
+            catch (Exception ex)
+            {
+                response.Status = ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
         public virtual DistanceResponse GetCurrentDistance(string userIdentifierOrigin, string userIdentifierDestination)
         {
             var result = new DistanceResponse();
-            //Obtener posiciones
-            GeolocationResponse positionOrigin = GetCurrentPositionUser(new GeolocationRequest
+            try
             {
-                UserIdentifier = userIdentifierOrigin
-            });
-            GeolocationResponse positionDestination = GetCurrentPositionUser(new GeolocationRequest
-            {
-                UserIdentifier = userIdentifierDestination
-            });
-            //Validar datos
-            if (!positionOrigin.GeolocationEnabled)
-            {
-                result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
-                result.Message = "Origin position disable";
-                return result;
+                //Obtener posiciones
+                GeolocationResponse positionOrigin = GetCurrentPositionUser(new GeolocationRequest
+                {
+                    UserIdentifier = userIdentifierOrigin
+                });
+                GeolocationResponse positionDestination = GetCurrentPositionUser(new GeolocationRequest
+                {
+                    UserIdentifier = userIdentifierDestination
+                });
+                //Validar datos
+                if (!positionOrigin.GeolocationEnabled)
+                {
+                    result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
+                    result.Message = "Origin position disable";
+                    return result;
+                }
+                if (!positionDestination.GeolocationEnabled)
+                {
+                    result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
+                    result.Message = "Destination position disable";
+                    return result;
+                }
+                result = DistanceTo(positionOrigin, positionDestination);
             }
-            if (!positionDestination.GeolocationEnabled)
+            catch (Exception ex)
             {
-                result.Status = Enums.ResponseStatusTypes.UserPositionNotEnable;
-                result.Message = "Destination position disable";
-                return result;
+                result.Status = ResponseStatusTypes.UnknowError;
+                result.Message = ex.Message;
             }
-            result = DistanceTo(positionOrigin, positionDestination);
             return result;
         }
 
         public virtual GeolocationResponse GetCurrentPositionUser(GeolocationRequest request)
         {
-            string userIdentifier = request.UserIdentifier;
-            GeolocationResponse currentPosition = GetCurrentPositionFromDB(userIdentifier);
-            if (currentPosition == null)
-                currentPosition.Status = ResponseStatusTypes.UserNotFound;
-            else
+            var response = new GeolocationResponse();
+            try
             {
-                if ((String.IsNullOrEmpty(currentPosition.Latitude)
-                    || String.IsNullOrEmpty(currentPosition.Longitude))
-                    && currentPosition.Status != ResponseStatusTypes.UserNotFound)
-                    currentPosition.Status = ResponseStatusTypes.UserPositionNotFound;
+                string userIdentifier = request.UserIdentifier;
+                GeolocationResponse currentPosition = GetCurrentPositionFromDB(userIdentifier);
+                if (currentPosition == null)
+                    currentPosition.Status = ResponseStatusTypes.UserNotFound;
+                else
+                {
+                    if ((String.IsNullOrEmpty(currentPosition.Latitude)
+                        || String.IsNullOrEmpty(currentPosition.Longitude))
+                        && currentPosition.Status != ResponseStatusTypes.UserNotFound)
+                        currentPosition.Status = ResponseStatusTypes.UserPositionNotFound;
+                }
+                //Ahorramos una llamada a la API
+                currentPosition.Address = string.Empty;
+                response = currentPosition;
             }
-            //Ahorramos una llamada a la API
-            currentPosition.Address = string.Empty;
-            return currentPosition;
+            catch (Exception ex)
+            {
+                response.Status = ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
         #endregion
 

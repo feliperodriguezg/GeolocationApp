@@ -18,6 +18,10 @@ namespace NetCore.GeolocationApp.Enums
         FriendsNotFound = 500,
         [Description("No permite seguimiento")]
         NotAllowFollow = 600,
+        [Description("No se actualizó los datos en el repositorio")]
+        UpdateFail = 700,
+        [Description("Usuario no tiene habilitada la geolocalización")]
+        UserHasNotEnableGeolocation = 800,
         [Description("Error desconocido")]
         UnknowError = 2000
     }
