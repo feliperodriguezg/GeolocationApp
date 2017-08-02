@@ -69,7 +69,7 @@ namespace NetCore.GeolocationApp.Repositories
                 new FriendInfoResponse
                 {
                     Name = "Felipe Rodríguez",
-                    UrlPhoto = "",
+                    UrlPhoto = "http://experience.grupandia.com/wp-content/uploads/2012/08/1.jpg",
                     UserIdentifier = "frodriguez",
                     FriendOf = "usertest"
                 },

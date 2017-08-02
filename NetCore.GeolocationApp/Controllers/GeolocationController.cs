@@ -13,6 +13,13 @@ namespace NetCore.GeolocationApp.Controllers
     [Route("api/[controller]")]
     public class GeolocationController : Controller
     {
+        public class RequestCurrentPosition
+        {
+            public string userIdentifier { get; set; }
+            public string latitude { get; set; }
+            public string longitude { get; set; }
+        }
+
         private const string ApiKey = "AIzaSyAwEYAAUxnE9XmNOsIoFJhd-590PdBDZ_4";
         private static readonly GeolocationService _services = new GeolocationService(ApiKey);
 
@@ -24,18 +31,28 @@ namespace NetCore.GeolocationApp.Controllers
             ServiceResponse response = new ServiceResponse();
             try
             {
-                response = _services.SetCurrentPosition(new CurrentPositionInfoRequest
+                if (String.IsNullOrEmpty(userIdentifier))
+                    response.Status = Enums.ResponseStatusTypes.UserNotFound;
+                if (String.IsNullOrEmpty(latitude) || String.IsNullOrEmpty(longitude))
+                    response.Status = Enums.ResponseStatusTypes.UserPositionNotFound;
+
+                if(response.Status == Enums.ResponseStatusTypes.Ok)
                 {
-                    UserIdentifier = userIdentifier,
-                    Latitude = latitude,
-                    Longitude = longitude
-                });
-                var result = _services.GetCurrentPositionUser(new GeolocationRequest
-                {
-                    UserIdentifier = userIdentifier
-                });
-                if (result.Status == Enums.ResponseStatusTypes.Ok)
-                    response.Message = string.Format("{0},{1}", result.Latitude, result.Longitude);
+                    response = _services.SetCurrentPosition(new CurrentPositionInfoRequest
+                    {
+                        UserIdentifier = userIdentifier,
+                        Latitude = latitude,
+                        Longitude = longitude
+                    });
+                    var result = _services.GetCurrentPositionUser(new GeolocationRequest
+                    {
+                        UserIdentifier = userIdentifier
+                    });
+                    if (result.Status == Enums.ResponseStatusTypes.Ok)
+                        response.Message = string.Format("{0},{1}", result.Latitude, result.Longitude);
+                }
+
+
             }
             catch (Exception ex)
             {

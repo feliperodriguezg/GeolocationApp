@@ -28,6 +28,14 @@ namespace NetCore.GeolocationApp.Controllers
                 {
                     UserIdentifier = userIdentifier
                 });
+                var friends = response.Friends;
+                foreach (FriendInformation friend in friends)
+                {
+                    if (friend.IsEnable)
+                    {
+                        friend.DistanceInfo = _services.GetCurrentDistance(userIdentifier, friend.UserIdentifier);
+                    }
+                }
             }
             catch (Exception ex)
             {

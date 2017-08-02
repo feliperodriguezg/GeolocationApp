@@ -20,5 +20,12 @@ namespace NetCore.GeolocationApp.WebApiModels
         public string Name { get; set; }
         public string UrlPhoto { get; set; }
         public bool IsEnable { get; set; }
+
+        public DistanceResponse DistanceInfo { get; set; }
+
+        public FriendInformation()
+        {
+            DistanceInfo = new DistanceResponse();
+        }
     }
 }

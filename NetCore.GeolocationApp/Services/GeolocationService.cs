@@ -58,7 +58,8 @@ namespace NetCore.GeolocationApp.Services
                             response.Friends.Add(new FriendInformation
                             {
                                 UserIdentifier = item.UserIdentifier,
-                                IsEnable = _repository.IsFollowerOf(item.UserIdentifier, request.UserIdentifier),
+                                //IsEnable = _repository.IsFollowerOf(item.UserIdentifier, request.UserIdentifier),
+                                IsEnable = true,
                                 Name = item.Name,
                                 UrlPhoto = item.UrlPhoto
                             });
