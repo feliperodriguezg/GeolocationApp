@@ -67,7 +67,7 @@ namespace NetCore.CacheManager
 
                 FileStream streamFile = null;
                 if (File.Exists(fileCache))
-                    streamFile = File.OpenRead(fileCache);
+                    streamFile = File.OpenWrite(fileCache);
                 else
                     streamFile = File.Create(fileCache);
                 

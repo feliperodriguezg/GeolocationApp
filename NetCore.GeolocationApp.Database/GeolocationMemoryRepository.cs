@@ -3,11 +3,21 @@ using NetCore.GeolocationApp.Repositories.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using NetCore.GeolocationApp.Repositories.Interfaces;
 
 namespace NetCore.GeolocationApp.Repositories
 {
     public class GeolocationMemoryRepository : IGeolocationRepository
     {
+        #region Members
+        private static IDataCacheManager _cacheManager;
+        private static List<UserInfoResponse> _memoryDataBase;
+        private static List<FriendInfoResponse> _friends;
+        private static List<FollowInfo> _follows;
+        private int _cacheDurationMiliseconds;
+        #endregion
+
+        #region Constructor
         public GeolocationMemoryRepository(string pathDirectoryCache, int cacheDurationMiliseconds)
         {
             _cacheDurationMiliseconds = cacheDurationMiliseconds;
@@ -20,12 +30,9 @@ namespace NetCore.GeolocationApp.Repositories
             if (_follows == null)
                 _follows = new List<FollowInfo>();
         }
-        private static IDataCacheManager _cacheManager;
-        private static List<UserInfoResponse> _memoryDataBase;
-        private static List<FriendInfoResponse> _friends;
-        private static List<FollowInfo> _follows;
-        private int _cacheDurationMiliseconds;
+        #endregion
 
+        #region Private methods
         private List<UserInfoResponse> InitDatabase()
         {
             const string ListaUsuarios = "lista_usuarios";
@@ -54,7 +61,7 @@ namespace NetCore.GeolocationApp.Repositories
             }   
         }
 
-        public List<FriendInfoResponse> InitListFriends()
+        private List<FriendInfoResponse> InitListFriends()
         {
             const string ListaFriends = "lista_friends";
             var data = _cacheManager.GetCache<List<FriendInfoResponse>>(ListaFriends);
@@ -86,8 +93,9 @@ namespace NetCore.GeolocationApp.Repositories
             }
             
         }
+        #endregion
 
-
+        #region IGeolocationRepository
         public UserInfoResponse GetUserInfo(string userIdentifier)
         {
             UserInfoResponse response = _memoryDataBase.SingleOrDefault(x => x.UserIdentifier == userIdentifier);
@@ -221,5 +229,6 @@ namespace NetCore.GeolocationApp.Repositories
             var query = _follows.SingleOrDefault(x => x.UserIdentifier == userIdentifierOrigin && x.UserIdentifierFollower == userIdentifierFollower);
             return query != null;
         }
+        #endregion
     }
 }

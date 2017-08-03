@@ -22,6 +22,22 @@ namespace NetCore.GeolocationApp.Enums
         UpdateFail = 700,
         [Description("Usuario no tiene habilitada la geolocalización")]
         UserHasNotEnableGeolocation = 800,
+        [Description("Falta información del usuario necesaria")]
+        UserInformationRequired = 900,
+        [Description("Username requerido")]
+        UsernameRequired = 901,
+        [Description("Password requerido")]
+        PasswordRequired = 902,
+        [Description("Email requerido")]
+        EmailRequired = 903,
+        [Description("No se actualizó los datos del usuario")]
+        UpdateUserInformationError = 904,
+        [Description("No se registró el usuario nuevo")]
+        RegisterNewUserError = 905,
+        [Description("Usuario bloqueado")]
+        UserBlocked = 906,
+        [Description("Login incorrecto")]
+        AuthenticationError = 907,
         [Description("Error desconocido")]
         UnknowError = 2000
     }

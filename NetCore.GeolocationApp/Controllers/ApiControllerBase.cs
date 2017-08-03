@@ -11,18 +11,6 @@ namespace NetCore.GeolocationApp.Controllers
 {
     public class ApiControllerBase: Controller
     {
-        protected const string ApiKey = "AIzaSyAwEYAAUxnE9XmNOsIoFJhd-590PdBDZ_4";
-        private GeolocationService _services;
-        public GeolocationService GeolocationService
-        {
-            get
-            {
-                if (_services == null)
-                    _services = new GeolocationService(ApiKey);
-                return _services;
-            }
-        }
-
         protected virtual ApiResultResponse<T> ResponseOk<T>()
         {
             return new ApiResultResponse<T>

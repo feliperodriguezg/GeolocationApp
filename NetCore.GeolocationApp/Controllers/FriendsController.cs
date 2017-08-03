@@ -13,7 +13,7 @@ using NetCore.GeolocationApp.Models;
 namespace NetCore.GeolocationApp.Controllers
 {
     [Route("api/[controller]")]
-    public class FriendsController : ApiControllerBase
+    public class FriendsController : GelocationControllerBase
     {
 
 

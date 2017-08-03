@@ -9,7 +9,7 @@ using System.Net;
 namespace NetCore.GeolocationApp.Controllers
 {
     [Route("api/[controller]")]
-    public class DistanceController : ApiControllerBase
+    public class DistanceController : GelocationControllerBase
     {
         // GET: api/values
         [HttpPost]
