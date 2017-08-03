@@ -8,29 +8,6 @@ namespace NetCore.GeolocationApp.Repositories
 {
     public class GeolocationMemoryRepository : IGeolocationRepository
     {
-        public class UserInfoTest
-        {
-            public bool EnableGeolocation { get; set; }
-            public string CurrentLatitude { get; set; }
-            public string CurrentLongitude { get; set; }
-            public string UserIdentifier { get; set; }
-            public string CurrentTravelMode { get; set; }
-        }
-
-        public class FriendInfo
-        {
-            public string UserIdentifier { get; set; }
-            public string Name { get; set; }
-            public string UrlPhoto { get; set; }
-            public string FriendOf { get; set; }
-        }
-
-        public class FollowInfo
-        {
-            public string UserIdentifier { get; set; }
-            public string UserIdentifierFollower { get; set; }
-        }
-
         public GeolocationMemoryRepository(string pathDirectoryCache, int cacheDurationMiliseconds)
         {
             _cacheDurationMiliseconds = cacheDurationMiliseconds;
