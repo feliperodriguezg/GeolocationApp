@@ -6,6 +6,7 @@ using NetCore.GeolocationApp.Models;
 using NetCore.GeolocationApp.WebApiModels;
 using System.Linq;
 using System.Net;
+using System;
 
 namespace NetCore.GeolocationApp.Test
 {
@@ -103,11 +104,11 @@ namespace NetCore.GeolocationApp.Test
             return found;
         }
 
-        private void SetUserAsFriendTestOk(string userIdentifier, string userIdentifierNewFriend, bool follow)
+        private void AllowFollowTest(string userIdentifier, string userIdentifierNewFriend, bool follow)
         {
             using (FriendsController controller = new FriendsController())
             {
-                var response = controller.Post(userIdentifier, userIdentifierNewFriend, follow) as ObjectResult;
+                var response = controller.AllowFollow(userIdentifier, userIdentifierNewFriend, follow) as ObjectResult;
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
                 Assert.IsTrue(response.Value != null);
                 Assert.IsTrue(response.Value is ApiResultResponse<ServiceResponse>);
@@ -116,12 +117,48 @@ namespace NetCore.GeolocationApp.Test
                 Assert.IsTrue(data.Data.Status == ResponseStatusTypes.Ok);
             }
         }
+
+        private bool HasFriendGeolocationDataTest(string userIdentifier, string userIdentifierFriend)
+        {
+            bool hasDataLocation = false;
+            using (FriendsController controller = new FriendsController())
+            {
+                var response = controller.Get(userIdentifier) as ObjectResult;
+                Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
+                Assert.IsTrue(response.Value != null);
+                Assert.IsTrue(response.Value is ApiResultResponse<FriendInformationResponse>);
+                var data = response.Value as ApiResultResponse<FriendInformationResponse>;
+                Assert.IsTrue(data.Ok);
+                Assert.IsTrue(data.Data.Status == ResponseStatusTypes.Ok);
+                var query = data.Data.Friends.SingleOrDefault(x => x.UserIdentifier == userIdentifierFriend);
+                hasDataLocation = query != null;
+                if(hasDataLocation)
+                    hasDataLocation = query.IsEnable && query.DistanceInfo != null;
+            }
+            return hasDataLocation;
+        }
+
+        private bool CanFollowTest(string userIdentifierFollower, string userIdentifierTarget)
+        {
+            using (FriendsController controller = new FriendsController())
+            {
+                var response = controller.CanFollow(userIdentifierFollower, userIdentifierTarget) as ObjectResult;
+                Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
+                Assert.IsTrue(response.Value != null);
+                Assert.IsTrue(response.Value is ApiResultResponse<ServiceResponse>);
+                var data = response.Value as ApiResultResponse<ServiceResponse>;
+                Assert.IsTrue(data.Ok);
+                Assert.IsTrue(data.Data.Status == ResponseStatusTypes.Ok);
+                return (bool)data.Data.Data;
+            }
+        }
         #endregion
 
         #region Tests
         [TestMethod]
         public void TestFullProccess()
         {
+            #region Constants
             const string userIdentifier1 = "frodriguez";
             const string latitude1 = "38.6819596";
             const string longitude1 = "-0.6012665";
@@ -129,6 +166,7 @@ namespace NetCore.GeolocationApp.Test
             const string userIdentifier2 = "usertest";
             const string latitude2 = "38.3673834";
             const string longitude2 = "-0.4784841";
+            #endregion
 
             #region User1 tiene activado geolocalización (OK)
             Assert.IsTrue(UserHasEnableGeoloactionTest(userIdentifier1));
@@ -183,21 +221,42 @@ namespace NetCore.GeolocationApp.Test
             bool isFriend1 = UserIsFriendOf(userIdentifier1, userIdentifier2);
             #endregion
 
-            #region Añadir a user1 como contacto de user2 si no lo es
+            #region Comprobar proceso de permitir y no permitir localizar a un amigo
             if (!isFriend1)
+                Assert.Fail("user1 no es contacto de user2");
+
+            bool canFollow = CanFollowTest(userIdentifier1, userIdentifier2);
+            if(!canFollow)
             {
-                SetUserAsFriendTestOk(userIdentifier1, userIdentifier2, true);
+                /*
+                 * En este punto, si obtenemos la lista de amigos del user1, el user2 debe aparecer como amigo
+                 * pero no debe contener información de posicionamiento
+                 */
+                bool hasGeolocationData = HasFriendGeolocationDataTest(userIdentifier1, userIdentifier2);
+                if (hasGeolocationData)
+                    Assert.Fail("No debería contener datos de geoposicionamiento ni debería aparecer como localización habilitada para el user 2");
+
+                AllowFollowTest(userIdentifier1, userIdentifier2, true);
+                canFollow = CanFollowTest(userIdentifier1, userIdentifier2);
+                if (!canFollow)
+                    Assert.Fail("Error al actualizar los followers del user2");
             }
-            #endregion
-
-            #region comprobar si user2 es contacto de user1
-            bool isFriend2 = UserIsFriendOf(userIdentifier2, userIdentifier1);
-            #endregion
-
-            #region Añadir a user2 como contacto de user1 si no lo es
-            if(!isFriend2)
+            else
             {
-                SetUserAsFriendTestOk(userIdentifier2, userIdentifier1, true);
+                AllowFollowTest(userIdentifier1, userIdentifier2, false);
+                /*
+                * En este punto, si obtenemos la lista de amigos del user1, el user2 debe aparecer como amigo
+                * pero no debe contener información de posicionamiento
+                */
+                bool hasGeolocationData = HasFriendGeolocationDataTest(userIdentifier1, userIdentifier2);
+                if (hasGeolocationData)
+                    Assert.Fail("No debería contener datos de geoposicionamiento ni debería aparecer como localización habilitada para el user 2");
+
+                canFollow = CanFollowTest(userIdentifier1, userIdentifier2);
+                if(canFollow)
+                    Assert.Fail("No debería poder seguirle al haber sido deshabilitado anteriormente");
+                else
+                    AllowFollowTest(userIdentifier1, userIdentifier2, false);
             }
             #endregion
         }

@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NetCore.CacheManager\NetCore.CacheManager.csproj" />
+  </ItemGroup>
+
 </Project>

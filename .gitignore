@@ -6,4 +6,6 @@ NetCore.GeolocationApp.Test/obj/
 NetCore.GeolocationApp.Test/bin/
 NetCore.GeolocationApp.GoogleMapsApi/obj/
 NetCore.GeolocationApp.GoogleMapsApi/bin/
+NetCore.CacheManager/bin/
+NetCore.CacheManager/obj/
 .vs/

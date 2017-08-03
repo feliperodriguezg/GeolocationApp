@@ -53,7 +53,31 @@ namespace NetCore.GeolocationApp.Controllers
 
         [HttpPost]
         [Route("AllowFollow")]
-        public IActionResult Post(string userIdentifier, string userIdentifierFriend, bool follow)
+        public IActionResult CanFollow(string userIdentifier, string userIdentifierFriend)
+        {
+            var response = StatusCode(HttpStatusCode.OK, ResponseOk<ServiceResponse>(new ServiceResponse()));
+            try
+            {
+                var result = GeolocationService.CanFollow(new CanFollowRequest
+                {
+                    userIdentifierTarget = userIdentifierFriend,
+                    userIdentifierFollower = userIdentifier
+                });
+                if (result.Status != Enums.ResponseStatusTypes.Ok)
+                    response = StatusCode(HttpStatusCode.NotModified, ResponseOk<ServiceResponse>(result));
+                else
+                    response.Value = ResponseOk<ServiceResponse>(result);
+            }
+            catch (Exception ex)
+            {
+                response = StatusCode(HttpStatusCode.InternalServerError, ResponseError<bool>(false, ex.Message));
+            }
+            return response;
+        }
+
+        [HttpPost]
+        [Route("AllowFollow")]
+        public IActionResult AllowFollow(string userIdentifier, string userIdentifierFriend, bool follow)
         {
             var response = StatusCode(HttpStatusCode.OK, ResponseOk<ServiceResponse>(new ServiceResponse()));
             try

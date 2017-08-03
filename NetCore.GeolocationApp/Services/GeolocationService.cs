@@ -12,6 +12,7 @@ namespace NetCore.GeolocationApp.Services
         #region Members
         private GoogleMapsApiService _googleMapsApi;
         private IGeolocationRepository _repository;
+        private string _pathDirectoryCacheInfo;
         #endregion
 
         #region Properties
@@ -36,6 +37,12 @@ namespace NetCore.GeolocationApp.Services
             _googleMapsApi = new GoogleMapsApiService(apiKey);
             _repository = InstanceDefaultRepository();
         }
+        public GeolocationService(string apiKey, string pathDirectoryCacheInfo)
+        {
+            _googleMapsApi = new GoogleMapsApiService(apiKey);
+            _repository = InstanceDefaultRepository();
+            _pathDirectoryCacheInfo = pathDirectoryCacheInfo;
+        }
         #endregion
 
         #region Public
@@ -58,8 +65,7 @@ namespace NetCore.GeolocationApp.Services
                             response.Friends.Add(new FriendInformation
                             {
                                 UserIdentifier = item.UserIdentifier,
-                                //IsEnable = _repository.IsFollowerOf(item.UserIdentifier, request.UserIdentifier),
-                                IsEnable = true,
+                                IsEnable = _repository.IsFollowerOf(item.UserIdentifier, request.UserIdentifier),
                                 Name = item.Name,
                                 UrlPhoto = item.UrlPhoto
                             });
@@ -88,6 +94,30 @@ namespace NetCore.GeolocationApp.Services
                     request.UserIdentifierFollower, 
                     request.Allow);
                 response.Status = ResponseStatusTypes.Ok;
+            }
+            return response;
+        }
+
+        public ServiceResponse CanFollow(CanFollowRequest request)
+        {
+            ServiceResponse response = new ServiceResponse();
+            try
+            {
+                if(String.IsNullOrEmpty(request.userIdentifierFollower) || String.IsNullOrEmpty(request.userIdentifierTarget))
+                    response.Status = ResponseStatusTypes.UserNotFound;
+                else
+                {
+                    bool existUser = _repository.ExistUser(request.userIdentifierFollower) && _repository.ExistUser(request.userIdentifierTarget);
+                    if (!existUser)
+                        response.Status = ResponseStatusTypes.UserNotFound;
+                    else
+                        response.Data = _repository.IsFollowerOf(request.userIdentifierTarget, request.userIdentifierFollower);
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
             }
             return response;
         }
@@ -247,7 +277,7 @@ namespace NetCore.GeolocationApp.Services
         #region Private
         private IGeolocationRepository InstanceDefaultRepository()
         {
-            return new GeolocationMemoryRepository();
+            return new GeolocationMemoryRepository(_pathDirectoryCacheInfo, 10000);
         }
 
         private bool HasGeoposition(GeolocationResponse geoposition)

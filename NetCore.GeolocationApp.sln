@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCore.GeolocationApp.Repo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{09FFE183-AA5E-4E56-9D55-9CF6AB63B24B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCore.GeolocationApp.Test", "NetCore.GeolocationApp.Test\NetCore.GeolocationApp.Test.csproj", "{5ED54565-7D7D-45EA-BD4E-19C87D741920}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCore.GeolocationApp.Test", "NetCore.GeolocationApp.Test\NetCore.GeolocationApp.Test.csproj", "{5ED54565-7D7D-45EA-BD4E-19C87D741920}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCore.CacheManager", "NetCore.CacheManager\NetCore.CacheManager.csproj", "{7DDD5567-2458-4233-A73F-D1E2D7E0055A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{5ED54565-7D7D-45EA-BD4E-19C87D741920}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5ED54565-7D7D-45EA-BD4E-19C87D741920}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5ED54565-7D7D-45EA-BD4E-19C87D741920}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DDD5567-2458-4233-A73F-D1E2D7E0055A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DDD5567-2458-4233-A73F-D1E2D7E0055A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DDD5567-2458-4233-A73F-D1E2D7E0055A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DDD5567-2458-4233-A73F-D1E2D7E0055A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

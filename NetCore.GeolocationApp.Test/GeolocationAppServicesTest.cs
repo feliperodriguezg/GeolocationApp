@@ -21,7 +21,7 @@ namespace NetCore.GeolocationApp.Test
         private GeolocationService InitializeServices()
         {
             var service = new GeolocationService(ApiKeyGoogleMaps);
-            service.Repository = new GeolocationMemoryRepository();
+            service.Repository = new GeolocationMemoryRepository("DatosCache\\", 10000);
             var result1 = service.GetCurrentPositionUser(new WebApiModels.GeolocationRequest
             {
                 UserIdentifier = RepositoryTest.UserIdentifierTest1
