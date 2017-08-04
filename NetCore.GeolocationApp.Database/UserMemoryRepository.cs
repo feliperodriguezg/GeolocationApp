@@ -83,9 +83,7 @@ namespace NetCore.GeolocationApp.Repositories
             bool result = true;
             string username = (string)userIdentifier;
             if(String.IsNullOrEmpty(username) || String.IsNullOrEmpty(userData.Username))
-            {
                 result = false;
-            }
             else
             {
                 var cache = _cacheManager.GetCache<InternalUserData>(username);
@@ -94,8 +92,8 @@ namespace NetCore.GeolocationApp.Repositories
                 else
                 {
                     UserData data = (UserData)cache;
-                    data.Email = cache.Email;
-                    data.Name = cache.Name;
+                    data.Email = userData.Email;
+                    data.Name = userData.Name;
                     _cacheManager.Remove(username);
                     _cacheManager.SaveCache<InternalUserData>(username, cache, 1000000);
                     result = true;

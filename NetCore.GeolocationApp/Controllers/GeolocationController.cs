@@ -7,6 +7,8 @@ using NetCore.GeolocationApp.Services;
 using NetCore.GeolocationApp.WebApiModels;
 using System.Net;
 using NetCore.GeolocationApp.Models;
+using Microsoft.Extensions.Options;
+using NetCore.GeolocationApp.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +23,8 @@ namespace NetCore.GeolocationApp.Controllers
             public string latitude { get; set; }
             public string longitude { get; set; }
         }
+
+        public GeolocationController(IOptions<AppSettings> appSettings): base(appSettings) { }
 
         #region Get or Set current position for user
         [HttpPost]

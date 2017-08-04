@@ -11,12 +11,12 @@ using System;
 namespace NetCore.GeolocationApp.Test
 {
     [TestClass]
-    public class GeolocationApiTest
+    public class GeolocationApiTest: TestBase
     {
         #region Private methods
         private void SetCurrentPositionOkTest(string userIdentifier, string latitude, string longitude)
         {
-            using (GeolocationController geolocationController = new GeolocationController())
+            using (GeolocationController geolocationController = new GeolocationController(base._appSettings))
             {
                 var resultCurrentPosition1 = (ObjectResult)geolocationController.PostCurrentPosition(userIdentifier, latitude, longitude);
                 Assert.IsTrue(resultCurrentPosition1.StatusCode == (int)HttpStatusCode.OK);
@@ -30,7 +30,7 @@ namespace NetCore.GeolocationApp.Test
 
         private void GetDistanceOkTest(string userIdentifier1, string userIdentifier2, HttpStatusCode httpStatusCode, ResponseStatusTypes dataStatus)
         {
-            using (DistanceController distanceController = new DistanceController())
+            using (DistanceController distanceController = new DistanceController(base._appSettings))
             {
                 var resultDistance = (ObjectResult)distanceController.Post(userIdentifier1, userIdentifier2);
                 Assert.IsTrue(resultDistance.StatusCode == (int)httpStatusCode);
@@ -51,7 +51,7 @@ namespace NetCore.GeolocationApp.Test
 
         private bool UserHasEnableGeoloactionTest(string userIdentifier)
         {
-            using (GeolocationController controller = new GeolocationController())
+            using (GeolocationController controller = new GeolocationController(base._appSettings))
             {
                 var response = (ObjectResult)controller.EnableViewPosition(userIdentifier);
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
@@ -66,7 +66,7 @@ namespace NetCore.GeolocationApp.Test
 
         private void SetEnablePositionTest(string userIdentifier, bool enable)
         {
-            using (GeolocationController controller = new GeolocationController())
+            using (GeolocationController controller = new GeolocationController(base._appSettings))
             {
                 var response = (ObjectResult)controller.EnableViewCurrentPosition(userIdentifier, enable);
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
@@ -90,7 +90,7 @@ namespace NetCore.GeolocationApp.Test
         private bool UserIsFriendOf(string userIdentifier1, string identifierFriend)
         {
             bool found = false;
-            using (FriendsController controller = new FriendsController())
+            using (FriendsController controller = new FriendsController(base._appSettings))
             {
                 var response = controller.Get(userIdentifier1) as ObjectResult;
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
@@ -106,7 +106,7 @@ namespace NetCore.GeolocationApp.Test
 
         private void AllowFollowTest(string userIdentifier, string userIdentifierNewFriend, bool follow)
         {
-            using (FriendsController controller = new FriendsController())
+            using (FriendsController controller = new FriendsController(base._appSettings))
             {
                 var response = controller.AllowFollow(userIdentifier, userIdentifierNewFriend, follow) as ObjectResult;
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
@@ -121,7 +121,7 @@ namespace NetCore.GeolocationApp.Test
         private bool HasFriendGeolocationDataTest(string userIdentifier, string userIdentifierFriend)
         {
             bool hasDataLocation = false;
-            using (FriendsController controller = new FriendsController())
+            using (FriendsController controller = new FriendsController(base._appSettings))
             {
                 var response = controller.Get(userIdentifier) as ObjectResult;
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);
@@ -140,7 +140,7 @@ namespace NetCore.GeolocationApp.Test
 
         private bool CanFollowTest(string userIdentifierFollower, string userIdentifierTarget)
         {
-            using (FriendsController controller = new FriendsController())
+            using (FriendsController controller = new FriendsController(base._appSettings))
             {
                 var response = controller.CanFollow(userIdentifierFollower, userIdentifierTarget) as ObjectResult;
                 Assert.IsTrue(response.StatusCode == (int)HttpStatusCode.OK);

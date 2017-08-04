@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using NetCore.GeolocationApp.Helpers;
 using NetCore.GeolocationApp.Models;
 using NetCore.GeolocationApp.Services;
 using System;
@@ -11,6 +13,20 @@ namespace NetCore.GeolocationApp.Controllers
 {
     public class ApiControllerBase: Controller
     {
+        private readonly AppSettings _appSettings;
+        protected AppSettings AppSettings
+        {
+            get
+            {
+                return _appSettings;
+            }
+        }
+
+        public ApiControllerBase(IOptions<AppSettings> appSettings)
+        {
+            _appSettings = appSettings.Value;
+        }
+
         protected virtual ApiResultResponse<T> ResponseOk<T>()
         {
             return new ApiResultResponse<T>

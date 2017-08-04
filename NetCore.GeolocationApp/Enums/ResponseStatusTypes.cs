@@ -38,6 +38,10 @@ namespace NetCore.GeolocationApp.Enums
         UserBlocked = 906,
         [Description("Login incorrecto")]
         AuthenticationError = 907,
+        [Description("Identificador del usuario no establecido")]
+        UserIdentifierRequired = 908,
+        [Description("No se eliminó al usuario del repositorio")]
+        DeleteUserError = 909,
         [Description("Error desconocido")]
         UnknowError = 2000
     }

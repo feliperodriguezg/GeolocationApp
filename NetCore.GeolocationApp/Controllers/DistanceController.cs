@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using NetCore.GeolocationApp.Helpers;
 using NetCore.GeolocationApp.Services;
 using NetCore.GeolocationApp.WebApiModels;
 using System;
@@ -11,6 +13,8 @@ namespace NetCore.GeolocationApp.Controllers
     [Route("api/[controller]")]
     public class DistanceController : GelocationControllerBase
     {
+        public DistanceController(IOptions<AppSettings> appSettings): base(appSettings) { }
+
         // GET: api/values
         [HttpPost]
         public IActionResult Post(string userIdentifierOrigin, string userIdentifierDestination)

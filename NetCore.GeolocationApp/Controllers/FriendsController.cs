@@ -7,6 +7,8 @@ using NetCore.GeolocationApp.WebApiModels;
 using NetCore.GeolocationApp.Services;
 using System.Net;
 using NetCore.GeolocationApp.Models;
+using Microsoft.Extensions.Options;
+using NetCore.GeolocationApp.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,7 +17,7 @@ namespace NetCore.GeolocationApp.Controllers
     [Route("api/[controller]")]
     public class FriendsController : GelocationControllerBase
     {
-
+        public FriendsController(IOptions<AppSettings> appSettings): base(appSettings) { }
 
         // GET: api/values
         [HttpGet]

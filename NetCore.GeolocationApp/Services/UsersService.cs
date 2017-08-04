@@ -112,5 +112,27 @@ namespace NetCore.GeolocationApp.Services
             }
             return response;
         }
+
+        public ServiceResponse DeleteUserApp(DeleteUserAppRequest request)
+        {
+            var response = new ServiceResponse();
+            try
+            {
+                if (String.IsNullOrEmpty(request.UserIdentifier))
+                    response.Status = Enums.ResponseStatusTypes.UserIdentifierRequired;
+                else
+                {
+                    bool deleted = _repository.DeleteUser(request.UserIdentifier);
+                    if (!deleted)
+                        response.Status = Enums.ResponseStatusTypes.DeleteUserError;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = Enums.ResponseStatusTypes.UnknowError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
     }
 }

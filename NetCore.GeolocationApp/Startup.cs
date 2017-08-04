@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetCore.GeolocationApp.Helpers;
 
 namespace NetCore.GeolocationApp
 {
@@ -29,6 +30,8 @@ namespace NetCore.GeolocationApp
         {
             // Add framework services.
             services.AddMvc();
+            var appSettings = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettings);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyHeader()
